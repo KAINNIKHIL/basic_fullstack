@@ -11,7 +11,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     {
         throw new ApiError(404,"All fields are required")
     }
-    const existedUser = User.findOne({
+    const existedUser = await User.findOne({
         $or : [{ email }]
     })
     if (existedUser){
@@ -28,7 +28,7 @@ const registerUser = asyncHandler(async(req,res)=>{
     const createdUser = await User.findById(user._id).select(
         "-password -refreshToken"
     )
-    if( createdUser ){
+    if( !createdUser ){
         throw new ApiError(500,"Something went wrong while entering the user")
     }
 
@@ -38,3 +38,33 @@ const registerUser = asyncHandler(async(req,res)=>{
 })
 
 export {registerUser}
+
+const loginUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  console.log("Login input:", email, password);
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  const isPasswordValid = await user.isPasswordCorrect(password);
+  console.log("Password valid:", isPasswordValid);
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid credentials");
+  }
+
+  const userWithoutPassword = await User.findById(user._id).select(
+    "-password -refreshToken"
+  );
+
+  return res.status(200).json(
+    new ApiResponse(200, userWithoutPassword, "Login successful")
+  );
+});
+
+export { loginUser };

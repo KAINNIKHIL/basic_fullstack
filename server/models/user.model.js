@@ -1,8 +1,8 @@
 import mongoose,{Schema} from "mongoose";
-import jwt from "jsonwebkton";
+import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 
-export const User = mongoose.model("User", userSchema);
+
 
 const userSchema = new Schema(
     {
@@ -52,7 +52,7 @@ userSchema.methods.generateAccessToken = function(){
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
-            expiryIn: process.env.ACCESS_TOKEN_EXPIRY
+            expiresIn: process.env.ACCESS_TOKEN_EXPIRY
         }
     )
 }
@@ -65,7 +65,10 @@ userSchema.methods.generateRefreshToken = function(){
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiryIn: process.env.REFRESH_TOKEN_EXPIRY
+            expiresIn: process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
+
+
+export const User = mongoose.model("User", userSchema);
